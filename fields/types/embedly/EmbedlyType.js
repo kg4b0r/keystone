@@ -20,9 +20,6 @@ function embedly (list, path, options) {
 	this.fromPath = options.from;
 	this.embedlyOptions = options.options || {};
 
-	// TODO: implement filtering, usage disabled for now
-	options.nofilter = true;
-
 	// check and api key has been set, or bail.
 	if (!keystone.get('embedly api key')) {
 		throw new Error('Invalid Configuration\n\n'
@@ -58,22 +55,22 @@ embedly.prototype.addToSchema = function (schema) {
 	var field = this;
 
 	this.paths = {
-		exists: this._path.append('.exists'),
-		type: this._path.append('.type'),
-		title: this._path.append('.title'),
-		url: this._path.append('.url'),
-		width: this._path.append('.width'),
-		height: this._path.append('.height'),
-		version: this._path.append('.version'),
-		description: this._path.append('.description'),
-		html: this._path.append('.html'),
-		authorName: this._path.append('.authorName'),
-		authorUrl: this._path.append('.authorUrl'),
-		providerName: this._path.append('.providerName'),
-		providerUrl: this._path.append('.providerUrl'),
-		thumbnailUrl: this._path.append('.thumbnailUrl'),
-		thumbnailWidth: this._path.append('.thumbnailWidth'),
-		thumbnailHeight: this._path.append('.thumbnailHeight'),
+		exists: this.path + '.exists',
+		type: this.path + '.type',
+		title: this.path + '.title',
+		url: this.path + '.url',
+		width: this.path + '.width',
+		height: this.path + '.height',
+		version: this.path + '.version',
+		description: this.path + '.description',
+		html: this.path + '.html',
+		authorName: this.path + '.authorName',
+		authorUrl: this.path + '.authorUrl',
+		providerName: this.path + '.providerName',
+		providerUrl: this.path + '.providerUrl',
+		thumbnailUrl: this.path + '.thumbnailUrl',
+		thumbnailWidth: this.path + '.thumbnailWidth',
+		thumbnailHeight: this.path + '.thumbnailHeight',
 	};
 
 	schema.nested[this.path] = true;
@@ -224,24 +221,29 @@ embedly.prototype.inputIsValid = function () {
 embedly.prototype.updateItem = function (item, data, callback) {
 	// TODO: This could be more granular and check for actual changes to values,
 	// see the Location field for an example
-	item.set(item.set(this.path, {
-		exists: data[this.paths.exists],
-		type: data[this.paths.type],
-		title: data[this.paths.title],
-		url: data[this.paths.url],
-		width: data[this.paths.width],
-		height: data[this.paths.height],
-		version: data[this.paths.version],
-		description: data[this.paths.description],
-		html: data[this.paths.html],
-		authorName: data[this.paths.authorName],
-		authorUrl: data[this.paths.authorUrl],
-		providerName: data[this.paths.providerName],
-		providerUrl: data[this.paths.providerUrl],
-		thumbnailUrl: data[this.paths.thumbnailUrl],
-		thumbnailWidth: data[this.paths.thumbnailWidth],
-		thumbnailHeight: data[this.paths.thumbnailHeight],
-	}));
+
+ // This field type is never editable, so to ensure that we don't inadvertently reset the fields on this item with a null value
+ // A conditional has been added to negate updating this item should the fromPath on the passed in data object be the same as that on the item.
+	if (data[this.fromPath] !== item[this.fromPath]) {
+		item.set(item.set(this.path, {
+			exists: data[this.paths.exists],
+			type: data[this.paths.type],
+			title: data[this.paths.title],
+			url: data[this.paths.url],
+			width: data[this.paths.width],
+			height: data[this.paths.height],
+			version: data[this.paths.version],
+			description: data[this.paths.description],
+			html: data[this.paths.html],
+			authorName: data[this.paths.authorName],
+			authorUrl: data[this.paths.authorUrl],
+			providerName: data[this.paths.providerName],
+			providerUrl: data[this.paths.providerUrl],
+			thumbnailUrl: data[this.paths.thumbnailUrl],
+			thumbnailWidth: data[this.paths.thumbnailWidth],
+			thumbnailHeight: data[this.paths.thumbnailHeight],
+		}));
+	}
 	process.nextTick(callback);
 };
 

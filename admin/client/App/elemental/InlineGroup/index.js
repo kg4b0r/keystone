@@ -1,26 +1,26 @@
-import { css, StyleSheet } from 'aphrodite/no-important';
-import React, { cloneElement, Children, Component, PropTypes } from 'react';
+import { css } from 'glamor';
+import React, { cloneElement, Children, PropTypes } from 'react';
 
 // NOTE: only accepts InlineGroupSection as a single child
 
 function InlineGroup ({
+	cssStyles,
 	block,
 	children,
 	className,
-	component,
+	component: Component,
 	contiguous,
-	...props,
+	...props
 }) {
-
-	// set the component
-	const Component = component;
-
 	// prepare group className
 	props.className = css(
 		classes.group,
 		!!block && classes.block,
-		className
+		cssStyles
 	);
+	if (className) {
+		props.className += (' ' + className);
+	}
 
 	// convert children to an array and filter out falsey values
 	const buttons = Children.toArray(children).filter(i => i);
@@ -28,7 +28,7 @@ function InlineGroup ({
 	// normalize the count
 	const count = buttons.length - 1;
 
-	// clone children and apply classNames that aphrodite can target
+	// clone children and apply classNames that glamor can target
 	props.children = buttons.map((c, idx) => {
 		if (!c) return null;
 
@@ -59,18 +59,22 @@ InlineGroup.propTypes = {
 		PropTypes.string,
 	]),
 	contiguous: PropTypes.bool,
+	cssStyles: PropTypes.shape({
+		_definition: PropTypes.object,
+		_name: PropTypes.string,
+	}),
 };
 InlineGroup.defaultProps = {
 	component: 'div',
 };
 
-const classes = StyleSheet.create({
+const classes = {
 	group: {
 		display: 'inline-flex',
 	},
 	block: {
 		display: 'flex',
 	},
-});
+};
 
 module.exports = InlineGroup;

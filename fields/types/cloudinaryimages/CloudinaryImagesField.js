@@ -9,8 +9,7 @@ import _ from 'lodash';
 import async from 'async';
 import React, { cloneElement } from 'react';
 import Field from '../Field';
-import { FormField, FormNote } from 'elemental';
-import { Button } from '../../../admin/client/App/elemental';
+import { Button, FormField, FormNote } from '../../../admin/client/App/elemental';
 import Lightbox from 'react-images';
 import cloudinaryResize from '../../../admin/client/utils/cloudinaryResize';
 import Thumbnail from './CloudinaryImagesThumbnail';
@@ -46,20 +45,22 @@ module.exports = Field.create({
 	},
 	buildInitialState (props) {
 		const uploadFieldPath = `CloudinaryImages-${props.path}-${++uploadInc}`;
-		const thumbnails = props.value.map((img, index) => {
+		const thumbnails = props.value ? props.value.map((img, index) => {
 			return this.getThumbnail({
 				value: img,
 				imageSourceSmall: cloudinaryResize(img.public_id, {
 					...RESIZE_DEFAULTS,
 					height: 90,
+					secure: props.secure,
 				}),
 				imageSourceLarge: cloudinaryResize(img.public_id, {
 					...RESIZE_DEFAULTS,
 					height: 600,
 					width: 900,
+					secure: props.secure,
 				}),
 			}, index);
-		});
+		}) : [];
 		return { thumbnails, uploadFieldPath };
 	},
 	getThumbnail (props, index) {
@@ -216,7 +217,7 @@ module.exports = Field.create({
 		}
 	},
 	renderLightbox () {
-		const { value } = this.props;
+		const { value, secure } = this.props;
 		if (!value || !value.length) return;
 
 		const images = value.map(image => ({
@@ -224,6 +225,7 @@ module.exports = Field.create({
 				...RESIZE_DEFAULTS,
 				height: 600,
 				width: 900,
+				secure,
 			}),
 		}));
 

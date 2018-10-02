@@ -15,8 +15,10 @@ module.exports = function createApp (keystone, express) {
 	}
 
 	var app = keystone.app;
+	require('./initLetsEncrypt')(keystone, app);
+	require('./initSslRedirect')(keystone, app);
 
-	keystone.initDatabase();
+	keystone.initDatabaseConfig();
 	keystone.initExpressSession(keystone.mongoose);
 
 	require('./initTrustProxy')(keystone, app);
@@ -81,6 +83,9 @@ module.exports = function createApp (keystone, express) {
 	// unless the headless option is set (which disables the Admin UI),
 	// bind the Admin UI's Dynamic Router
 	if (!keystone.get('headless')) {
+		if (typeof keystone.get('pre:admin') === 'function') {
+			keystone.get('pre:admin')(app);
+		}
 		app.use(function (req, res, next) {
 			keystone.callHook('pre:admin', req, res, next);
 		});

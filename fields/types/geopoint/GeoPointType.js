@@ -13,8 +13,6 @@ var REGEXP_LNGLAT = /^\s*(\-?\d+(?:\.\d+)?)\s*\,\s*(\-?\d+(?:\.\d+)?)\s*$/;
  */
 function geopoint (list, path, options) {
 	this._fixedSize = 'medium';
-	// TODO: implement filtering
-	options.nofilter = true;
 	geopoint.super_.call(this, list, path, options);
 }
 geopoint.properName = 'GeoPoint';
@@ -53,7 +51,7 @@ geopoint.prototype.format = function (item) {
 geopoint.prototype.validateInput = function (data, callback) {
 	var value = this.getValueFromData(data);
 	var result = false;
-	if (value === undefined || value === null || value === '') {
+	if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 2 && value.join('') === '')) {
 		result = true;
 	} else {
 		if (Array.isArray(value)) {

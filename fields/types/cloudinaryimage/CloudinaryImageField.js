@@ -6,9 +6,8 @@ work out whether we're going to support deleting through the UI.
 
 import React, { PropTypes } from 'react';
 import Field from '../Field';
-import { FormField, FormInput, FormNote } from 'elemental';
 import cloudinaryResize from '../../../admin/client/utils/cloudinaryResize';
-import { Button } from '../../../admin/client/App/elemental';
+import { Button, FormField, FormInput, FormNote } from '../../../admin/client/App/elemental';
 
 import ImageThumbnail from '../../components/ImageThumbnail';
 import FileChangeMessage from '../../components/FileChangeMessage';
@@ -74,7 +73,7 @@ module.exports = Field.create({
 		return !!this.state.userSelectedFile;
 	},
 	hasExisting () {
-		return !!this.props.value.url;
+		return !!(this.props.value && this.props.value.url);
 	},
 	hasImage () {
 		return this.hasExisting() || this.hasLocal();
@@ -96,6 +95,7 @@ module.exports = Field.create({
 				crop: 'fit',
 				height: height,
 				format: 'jpg',
+				secure: this.props.secure,
 			});
 		}
 
@@ -181,14 +181,16 @@ module.exports = Field.create({
 
 	renderLightbox () {
 		const { value } = this.props;
-		if (!value || !Object.keys(value).length) return;
+
+		if (!value || !value.public_id) return;
 
 		return (
 			<Lightbox
-				images={[this.getImageSource(600)]}
 				currentImage={0}
+				images={[{ src: this.getImageSource(600) }]}
 				isOpen={this.state.lightboxIsVisible}
 				onClose={this.closeLightbox}
+				showImageCount={false}
 			/>
 		);
 	},
@@ -285,13 +287,18 @@ module.exports = Field.create({
 		);
 	},
 
+	// This renders a hidden input that holds the payload data for how the field
+	// should be updated. It should be upload:{filename}, undefined, or 'remove'
 	renderActionInput () {
 		if (!this.shouldRenderField()) return null;
 
 		if (this.state.userSelectedFile || this.state.removeExisting) {
-			const value = this.state.userSelectedFile
-				? `upload:${this.state.uploadFieldPath}`
-				: '';
+			let value = '';
+			if (this.state.userSelectedFile) {
+				value = `upload:${this.state.uploadFieldPath}`;
+			} else if (this.state.removeExisting && this.props.autoCleanup) {
+				value = 'delete';
+			}
 			return (
 				<input
 					name={this.getInputName(this.props.path)}
@@ -316,7 +323,7 @@ module.exports = Field.create({
 
 		const toolbar = this.shouldRenderField()
 			? this.renderImageToolbar()
-			: <FormInput noedit>no image</FormInput>;
+			: <FormInput noedit />;
 
 		return (
 			<FormField label={label} className="field-type-cloudinaryimage" htmlFor={path}>

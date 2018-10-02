@@ -1,9 +1,15 @@
 import { SketchPicker } from 'react-color';
-import { css, StyleSheet } from 'aphrodite/no-important';
+import { css } from 'glamor';
 import Field from '../Field';
 import React from 'react';
-import { Button, FormInput, InputGroup } from 'elemental';
+import {
+	Button,
+	FormInput,
+	InlineGroup as Group,
+	InlineGroupSection as Section,
+} from '../../../admin/client/App/elemental';
 import transparentSwatch from './transparent-swatch';
+import coloredSwatch from './colored-swatch';
 import theme from '../../../admin/client/theme';
 
 const ColorField = Field.create({
@@ -56,7 +62,8 @@ const ColorField = Field.create({
 		return (this.props.value) ? (
 			<span
 				className={className}
-				style={{ backgroundColor: this.props.value }}
+				style={{ color: this.props.value }}
+				dangerouslySetInnerHTML={{ __html: coloredSwatch }}
 			/>
 		) : (
 			<span
@@ -67,13 +74,11 @@ const ColorField = Field.create({
 	},
 	renderField () {
 		const { displayColorPicker } = this.state;
-		const blockoutClassName = `${css(classes.blockout)} e2e-type-color__blockout`;
-		const popoverClassName = `${css(classes.popover)} e2e-type-color__popover`;
 
 		return (
 			<div className="e2e-type-color__wrapper" style={{ position: 'relative' }}>
-				<InputGroup>
-					<InputGroup.Section grow>
+				<Group>
+					<Section grow>
 						<FormInput
 							autoComplete="off"
 							name={this.getInputName(this.props.path)}
@@ -81,20 +86,21 @@ const ColorField = Field.create({
 							ref="field"
 							value={this.props.value}
 						/>
-					</InputGroup.Section>
-					<InputGroup.Section>
-						<Button onClick={this.handleClick} className={`${css(classes.button)} e2e-type-color__button`}>
+					</Section>
+					<Section>
+						<Button onClick={this.handleClick} cssStyles={classes.button} data-e2e-type-color__button>
 							{this.renderSwatch()}
 						</Button>
-					</InputGroup.Section>
-				</InputGroup>
+					</Section>
+				</Group>
 				{displayColorPicker && (
 					<div>
 						<div
-							className={blockoutClassName}
+							className={css(classes.blockout)}
+							data-e2e-type-color__blockout
 							onClick={this.handleClose}
 						/>
-						<div className={popoverClassName} onClick={e => e.stopPropagation()}>
+						<div className={css(classes.popover)} onClick={e => e.stopPropagation()} data-e2e-type-color__popover>
 							<SketchPicker
 								color={this.props.value}
 								onChangeComplete={this.handlePickerChange}
@@ -109,7 +115,7 @@ const ColorField = Field.create({
 });
 
 /* eslint quote-props: ["error", "as-needed"] */
-const classes = StyleSheet.create({
+const classes = {
 	button: {
 		background: 'white',
 		padding: 4,
@@ -130,16 +136,17 @@ const classes = StyleSheet.create({
 	popover: {
 		marginTop: 10,
 		position: 'absolute',
-		right: 0,
-		zIndex: 2,
+		left: 0,
+		zIndex: 500,
 	},
 	swatch: {
 		borderRadius: 1,
-		boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)',
+		boxShadow: '0 0 0 1px rgba(0,0,0,0.1)',
 		display: 'block',
-		height: '100%',
-		width: '100%',
+		' svg': {
+			display: 'block',
+		},
 	},
-});
+};
 
 module.exports = ColorField;

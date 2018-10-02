@@ -4,10 +4,13 @@ Deprecated.
 Using this field will now throw an error, and this code will be removed soon.
 
 See https://github.com/keystonejs/keystone/wiki/File-Fields-Upgrade-Guide
+
+TODO: this is used by keystone/admin/server/api/s3.js to generate headers, and should be factored out
 */
 
 /* eslint-disable */
-
+var _ = require('lodash');
+var assign = require('object-assign');
 var loggedWarning = false;
 
 /**
@@ -68,21 +71,21 @@ Object.defineProperty(s3file.prototype, 's3config', {
  */
 s3file.prototype.addToSchema = function (schema) {
 
-	var knox = require('knox');
+	var knox = require('knox-s3');
 	var field = this;
 
 	var paths = this.paths = {
 		// fields
-		filename: this._path.append('.filename'),
-		originalname: this._path.append('.originalname'),
-		path: this._path.append('.path'),
-		size: this._path.append('.size'),
-		filetype: this._path.append('.filetype'),
-		url: this._path.append('.url'),
+		filename: this.path + '.filename',
+		originalname: this.path + '.originalname',
+		path: this.path + '.path',
+		size: this.path + '.size',
+		filetype: this.path + '.filetype',
+		url: this.path + '.url',
 		// virtuals
-		exists: this._path.append('.exists'),
-		upload: this._path.append('_upload'),
-		action: this._path.append('_action'),
+		exists: this.path + '.exists',
+		upload: this.path + '_upload',
+		action: this.path + '_action',
 	};
 
 	var schemaPaths = this._path.addTo({}, {
@@ -333,7 +336,7 @@ s3file.prototype.generateHeaders = function (item, file, callback) {
  */
 s3file.prototype.uploadFile = function (item, file, update, callback) {
 
-	var knox = require('knox');
+	var knox = require('knox-s3');
 	var field = this;
 	var path = field.options.s3path ? field.options.s3path + '/' : '';
 	var prefix = field.options.datePrefix ? moment().format(field.options.datePrefix) + '-' : '';
